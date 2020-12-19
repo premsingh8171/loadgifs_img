@@ -4,9 +4,10 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -16,13 +17,15 @@ import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.premsinghdaksha.startactivityanimationlibrary.AppUtils;
-import com.premsinghdaksha.trainmaingif.GifFullScreen;
 import com.premsinghdaksha.trainmaingif.R;
 import com.premsinghdaksha.trainmaingif.adapter.DataAdapter;
 import com.premsinghdaksha.trainmaingif.interfaces.ApiInterface;
 import com.premsinghdaksha.trainmaingif.model.DataDTO;
 import com.premsinghdaksha.trainmaingif.model.ResponseDTO;
+import com.premsinghdaksha.utils.BaseActivity;
+import com.premsinghdaksha.utils.LocalPreference;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -30,19 +33,50 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
     private ApiInterface apiInterface;
     private DataAdapter dataAdapter;
     private RecyclerView rv_gif;
+    private SwipeRefreshLayout refrece;
+    private LocalPreference localPreference;
+    private List<DataDTO> dataList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        localPreference = new LocalPreference(MainActivity.this);
+        dataList.clear();
         rv_gif = findViewById(R.id.rv_gif);
+        refrece = findViewById(R.id.refrece);
         // apiInterface = APIClient.getClient().create(ApiInterface.class);
         //ApiResponce();
-        apiCall("https://api.giphy.com/v1/gifs/trending?api_key=eLPy7CXqimAo9wqht5EKRcAujKGpzDsV&limit=25");
+
+        if (dataList.size() == 0) {
+            if (isConnectingToInternet()) {
+                apiCall("https://api.giphy.com/v1/gifs/trending?api_key=eLPy7CXqimAo9wqht5EKRcAujKGpzDsV&limit=25");
+            }
+            {
+                Toast.makeText(MainActivity.this, "No internet", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            dataList = localPreference.getData("offile");
+            rvSetData(dataList);
+        }
+
+        refrece.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                localPreference.clear();
+                if (isConnectingToInternet()) {
+                    refrece.setRefreshing(true);
+                    apiCall("https://api.giphy.com/v1/gifs/trending?api_key=eLPy7CXqimAo9wqht5EKRcAujKGpzDsV&limit=25");
+                } else {
+                    Toast.makeText(MainActivity.this, "No internet", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
     }
 
     //using retrofit
@@ -77,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
 
     //using volley
     private void apiCall(String urls) {
+        refrece.setRefreshing(false);
         ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
         progressDialog.setCanceledOnTouchOutside(false);
         progressDialog.show();
@@ -84,10 +119,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(String response) {
                 Log.d("response", response);
+                refrece.setRefreshing(false);
+                dataList.clear();
                 progressDialog.dismiss();
                 GsonBuilder gsonBuilder = new GsonBuilder();
                 Gson gson = gsonBuilder.create();
                 ResponseDTO responseDTO = gson.fromJson(response, ResponseDTO.class);
+                dataList = responseDTO.getData();
+                localPreference.StoreData(dataList, "offile");
                 rvSetData(responseDTO.getData());
             }
         }, new com.android.volley.Response.ErrorListener() {

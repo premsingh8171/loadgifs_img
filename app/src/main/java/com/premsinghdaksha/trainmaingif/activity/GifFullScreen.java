@@ -1,4 +1,4 @@
-package com.premsinghdaksha.trainmaingif;
+package com.premsinghdaksha.trainmaingif.activity;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -6,18 +6,20 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.github.chrisbanes.photoview.OnPhotoTapListener;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.premsinghdaksha.startactivityanimationlibrary.AppUtils;
+import com.premsinghdaksha.trainmaingif.R;
+import com.premsinghdaksha.utils.BaseActivity;
 
 import static android.R.attr.uiOptions;
 
-public class GifFullScreen extends AppCompatActivity {
+public class GifFullScreen extends BaseActivity {
     PhotoView photoView;
     ImageView ImgCacel;
 
@@ -29,7 +31,11 @@ public class GifFullScreen extends AppCompatActivity {
         ImgCacel = findViewById(R.id.ImgCacel);
         if (getIntent().getStringExtra("url") != null) {
             String cover = getIntent().getStringExtra("url");
-            Glide.with(this).load(cover).into(photoView);
+            if (isConnectingToInternet()) {
+                Glide.with(this).load(cover).into(photoView);
+            }{
+                Toast.makeText(this, "No internet", Toast.LENGTH_SHORT).show();
+            }
         }
 
         ImgCacel.setOnClickListener(new View.OnClickListener() {
