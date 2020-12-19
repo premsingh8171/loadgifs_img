@@ -31,11 +31,7 @@ public class GifFullScreen extends BaseActivity {
         ImgCacel = findViewById(R.id.ImgCacel);
         if (getIntent().getStringExtra("url") != null) {
             String cover = getIntent().getStringExtra("url");
-            if (isConnectingToInternet()) {
                 Glide.with(this).load(cover).into(photoView);
-            }{
-                Toast.makeText(this, "No internet", Toast.LENGTH_SHORT).show();
-            }
         }
 
         ImgCacel.setOnClickListener(new View.OnClickListener() {
