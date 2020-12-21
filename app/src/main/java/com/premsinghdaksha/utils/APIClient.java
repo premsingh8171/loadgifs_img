@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class APIClient {
     private static Retrofit retrofit = null;
 
-    static Retrofit getClient() {
+    public static Retrofit getClient() {
 
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);

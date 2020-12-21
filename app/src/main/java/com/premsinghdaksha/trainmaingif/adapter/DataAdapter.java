@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 import com.premsinghdaksha.trainmaingif.R;
 import com.premsinghdaksha.trainmaingif.model.DataDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DataAdapter extends RecyclerView.Adapter<DataAdapter.DataViewholder> {
@@ -51,6 +52,12 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.DataViewholder
     @Override
     public int getItemCount() {
         return dataDTOList.size();
+    }
+
+    public void setFilter(List<DataDTO> dataDTOS_) {
+        dataDTOList = new ArrayList<>();
+        dataDTOList.addAll(dataDTOS_);
+        notifyDataSetChanged();
     }
 
     public class DataViewholder extends RecyclerView.ViewHolder {
